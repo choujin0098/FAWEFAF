@@ -1,0 +1,448 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>My Loans - LibriNova Library</title>
+  <link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&amp;family=Work+Sans:wght@400;500;600;700&amp;display=swap" rel="stylesheet">
+  <script src="https://cdn.jsdelivr.net/npm/lucide@0.577.0/dist/umd/lucide.min.js" type="text/javascript"></script>
+  <style>
+    :root {
+      --ivory: #f8f5ed;
+      --paper: #fffdf8;
+      --forest: #1d4a3b;
+      --deep-forest: #12352b;
+      --sage: #dce7d9;
+      --beige-border: #ded7c7;
+      --ink: #24382e;
+      --muted: #6d766d;
+      --gold: #c99545;
+      --alert: #c25e4b;
+    }
+
+    * { box-sizing: border-box; }
+    html { background: var(--ivory); }
+    body {
+      margin: 0;
+      width: 100%;
+      min-height: 100vh;
+      background: var(--ivory);
+      color: var(--ink);
+      font-family: "Work Sans", sans-serif;
+    }
+
+    button, input { font: inherit; }
+    button { cursor: pointer; }
+
+    /* 侧边栏样式 */
+    .library-sidebar {
+      position: fixed;
+      inset: 0 auto 0 0;
+      z-index: 20;
+      width: 210px;
+      padding: 25px 15px;
+      background: #f0eee5;
+      border-right: 1px solid var(--beige-border);
+      display: flex;
+      flex-direction: column;
+    }
+
+    .brand-mark {
+      width: 34px;
+      height: 34px;
+      border-radius: 8px;
+      display: grid;
+      place-items: center;
+      background: var(--forest);
+      color: white;
+      box-shadow: 0 5px 13px rgba(29, 74, 59, .16);
+    }
+
+    .brand-name, h1, h2, h3, .book-title {
+      font-family: "Source Serif Pro", serif;
+    }
+
+    .nav-link {
+      transition: transform .18s ease, background-color .18s ease, box-shadow .18s ease, color .18s ease;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .nav-link:hover, .nav-link:focus-visible {
+      background: #e2e7dc;
+      color: var(--deep-forest);
+    }
+
+    .nav-link.is-active {
+      background: var(--forest);
+      color: white;
+      box-shadow: 0 5px 12px rgba(29, 74, 59, .14);
+    }
+
+    .main-area {
+      width: calc(100% - 210px);
+      margin-left: 210px;
+      padding: 26px 30px 44px 24px;
+    }
+
+    .main-inner {
+      width: 100%;
+      max-width: 1260px;
+      margin: 0 auto;
+    }
+
+    /* 顶部搜索与用户 */
+    .header-row {
+      display: flex;
+      gap: 16px;
+      align-items: center;
+    }
+
+    .search-wrapper {
+      position: relative;
+      flex-grow: 1;
+    }
+
+    .search-input {
+      width: 100%;
+      height: 46px;
+      border: 1px solid var(--beige-border);
+      border-radius: 8px;
+      background: var(--paper);
+      color: var(--ink);
+      padding: 0 16px 0 43px;
+      outline: none;
+      box-shadow: 0 2px 7px rgba(42, 51, 39, .04);
+      transition: border-color .18s ease, box-shadow .18s ease;
+    }
+
+    .search-input:focus {
+      border-color: var(--forest);
+      box-shadow: 0 0 0 3px rgba(29, 74, 59, .12);
+    }
+
+    .account-icon-btn {
+      width: 46px;
+      height: 46px;
+      border-radius: 8px;
+      border: 1px solid var(--beige-border);
+      background: var(--paper);
+      color: var(--forest);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all .18s ease;
+    }
+
+    .account-icon-btn:hover {
+      border-color: var(--forest);
+      background: #edf3ea;
+    }
+
+    /* 借阅列表区域 */
+    .loan-list {
+      display: flex;
+      flex-direction: column;
+      gap: 16px;
+      margin-top: 24px;
+    }
+
+    /* 红色区域：书籍信息卡片 */
+    .loan-card {
+      display: flex;
+      align-items: center;
+      background: var(--paper);
+      border: 1px solid var(--beige-border);
+      border-radius: 10px;
+      padding: 16px 20px;
+      box-shadow: 0 4px 12px rgba(42, 51, 39, .045);
+      transition: transform .18s ease, box-shadow .18s ease, border-color .18s ease;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loan-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 10px 18px rgba(42, 51, 39, .09);
+      border-color: #acbca8;
+    }
+
+    /* 封面占位 */
+    .loan-cover {
+      width: 65px;
+      height: 90px;
+      border-radius: 5px;
+      flex-shrink: 0;
+      box-shadow: 0 4px 8px rgba(20, 43, 34, .13);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .loan-cover::after {
+      content: ""; position: absolute; inset: 0;
+      border: 1px solid rgba(255,255,255,.18); border-radius: 5px;
+    }
+
+    /* 复用主页的封面背景样式 */
+    .cover-moon { background: linear-gradient(145deg, #183c45 0%, #285d5d 57%, #d5b865 57%, #d5b865 61%, #f1e5ba 61%); }
+    .cover-orchard { background: linear-gradient(160deg, #c9533d 0%, #dc7856 62%, #f5dca9 62%); }
+    .cover-tide { background: linear-gradient(155deg, #163e67 0%, #387ca0 58%, #dce6d8 58%); }
+    .cover-garden { background: linear-gradient(145deg, #243d2f 0%, #54734a 55%, #c9aa59 55%); }
+
+    /* 图书信息 (对应草图红色区域中间部分) */
+    .loan-info {
+      flex-grow: 1;
+      margin-left: 20px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .loan-title {
+      font-family: "Source Serif Pro", serif;
+      font-size: 18px;
+      font-weight: 600;
+      color: var(--forest);
+      margin: 0;
+    }
+
+    .loan-meta {
+      font-size: 13px;
+      color: var(--muted);
+      margin: 0;
+      display: flex;
+      gap: 16px;
+    }
+
+    /* 状态与日期 (对应草图红色区域右侧部分) */
+    .loan-status {
+      text-align: right;
+      display: flex;
+      flex-direction: column;
+      align-items: flex-end;
+      gap: 8px;
+      min-width: 120px;
+    }
+
+    .status-badge {
+      font-size: 11px;
+      font-weight: 700;
+      padding: 4px 10px;
+      border-radius: 20px;
+      text-transform: uppercase;
+      letter-spacing: .05em;
+    }
+
+    .badge-normal {
+      background: var(--sage);
+      color: var(--deep-forest);
+    }
+
+    .badge-warning {
+      background: #fbeae7;
+      color: var(--alert);
+    }
+
+    .due-date {
+      font-size: 12px;
+      font-weight: 600;
+      color: var(--muted);
+    }
+
+    .due-date span {
+      color: var(--ink);
+    }
+
+    /* 响应式适配 */
+    @media (max-width: 980px) {
+      .library-sidebar {
+        position: static;
+        width: 100%;
+        min-height: auto;
+        padding: 15px 18px;
+        flex-direction: row;
+        align-items: center;
+        gap: 18px;
+      }
+      .library-sidebar nav { flex: 1; overflow-x: auto; }
+      .library-sidebar nav ul { display: flex; gap: 5px; }
+      .main-area { width: 100%; margin-left: 0; padding: 22px 20px 35px; }
+    }
+
+    @media (max-width: 600px) {
+      .loan-card {
+        flex-direction: column;
+        align-items: flex-start;
+        padding: 16px;
+      }
+      .loan-cover { margin-bottom: 12px; }
+      .loan-info { margin-left: 0; margin-bottom: 12px; }
+      .loan-status { text-align: left; align-items: flex-start; }
+    }
+  </style>
+</head>
+<body>
+  <div class="page-shell">
+    <!-- 左侧导航栏 -->
+    <aside class="library-sidebar" aria-label="Library navigation">
+      <div class="flex items-center gap-2.5" style="display: flex; align-items: center; gap: 10px;">
+        <div class="brand-mark" aria-hidden="true">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+          </svg>
+        </div>
+        <div>
+          <p class="brand-name" style="margin: 0; color: var(--forest); font-weight: 700; font-size: 19px; line-height: 1.1;">LibriNova</p>
+          <p style="margin: 0; margin-top: 2px; font-size: 10px; text-transform: uppercase; letter-spacing: .12em; color: #718075; font-weight: 700;">Public Library</p>
+        </div>
+      </div>
+
+      <nav style="margin-top: 36px;" aria-label="Primary">
+        <ul style="margin: 0; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 4px;">
+          <!-- 导航链接，根据草图，My Loans 设为 active -->
+          <li>
+            <button type="button" class="nav-link" style="width: 100%; border: 0; background: transparent; padding: 10px 12px; text-align: left; font-size: 13px; font-weight: 600; border-radius: 6px; color: #365547;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"></path><polyline points="9 22 9 12 15 12 15 22"></polyline></svg>
+              Home
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-link is-active" style="width: 100%; border: 0; padding: 10px 12px; text-align: left; font-size: 13px; font-weight: 600; border-radius: 6px;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path></svg>
+              My Loans
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-link" style="width: 100%; border: 0; background: transparent; padding: 10px 12px; text-align: left; font-size: 13px; font-weight: 600; border-radius: 6px; color: #365547;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect width="16" height="20" x="4" y="2" rx="2"></rect><path d="M12 18h.01"></path></svg>
+              E-book
+            </button>
+          </li>
+          <li>
+            <button type="button" class="nav-link" style="width: 100%; border: 0; background: transparent; padding: 10px 12px; text-align: left; font-size: 13px; font-weight: 600; border-radius: 6px; color: #365547;">
+              <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><path d="M9.1 9a3 3 0 1 1 5.3 1.9c-.8 1-2.4 1.4-2.4 3.1"></path><path d="M12 17h.01"></path></svg>
+              Research
+            </button>
+          </li>
+        </ul>
+      </nav>
+    </aside>
+
+    <!-- 右侧主内容区 -->
+    <main class="main-area">
+      <div class="main-inner">
+        <!-- 顶部栏：搜索 + 用户图标 -->
+        <header>
+          <div class="header-row">
+            <div class="search-wrapper">
+              <svg style="position: absolute; left: 14px; top: 50%; transform: translateY(-50%); color: #6f7d70;" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+              </svg>
+              <label style="position: absolute; width: 1px; height: 1px; padding: 0; margin: -1px; overflow: hidden; clip: rect(0, 0, 0, 0); border: 0;" for="loan-search">Search my loans</label>
+              <input id="loan-search" class="search-input" type="search" autocomplete="off" placeholder="Search my borrowed books...">
+            </div>
+            <!-- 草图中的“用户”图标 -->
+            <button class="account-icon-btn" aria-label="User Account" title="User Account">
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                <path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"></path>
+                <circle cx="12" cy="7" r="4"></circle>
+              </svg>
+            </button>
+          </div>
+          
+          <h1 style="margin: 24px 0 0; color: var(--deep-forest); font-family: 'Source Serif Pro', serif; font-size: 24px; font-weight: 700;">My Loans</h1>
+        </header>
+
+        <!-- 借阅列表（蓝色区域下方线条部分） -->
+        <section class="loan-list" id="loan-list">
+          
+          <!-- 卡片 1 -->
+          <article class="loan-card" data-title="The Paper Moon">
+            <div class="loan-cover cover-moon"></div>
+            <div class="loan-info">
+              <h3 class="loan-title">The Paper Moon</h3>
+              <div class="loan-meta">
+                <span>Author: Clara Wren</span>
+                <span>Call No: FIC WRE</span>
+              </div>
+            </div>
+            <div class="loan-status">
+              <span class="status-badge badge-normal">Borrowed</span>
+              <span class="due-date">Due: <span>Oct 24, 2026</span></span>
+            </div>
+          </article>
+
+          <!-- 卡片 2 -->
+          <article class="loan-card" data-title="The Last Orchard">
+            <div class="loan-cover cover-orchard"></div>
+            <div class="loan-info">
+              <h3 class="loan-title">The Last Orchard</h3>
+              <div class="loan-meta">
+                <span>Author: Mara Ellis</span>
+                <span>Call No: FIC ELL</span>
+              </div>
+            </div>
+            <div class="loan-status">
+              <span class="status-badge badge-warning">Due Soon</span>
+              <span class="due-date">Due: <span>Oct 10, 2026</span></span>
+            </div>
+          </article>
+
+          <!-- 卡片 3 -->
+          <article class="loan-card" data-title="Quiet Tide">
+            <div class="loan-cover cover-tide"></div>
+            <div class="loan-info">
+              <h3 class="loan-title">Quiet Tide</h3>
+              <div class="loan-meta">
+                <span>Author: Noah Rowe</span>
+                <span>Call No: FIC ROW</span>
+              </div>
+            </div>
+            <div class="loan-status">
+              <span class="status-badge badge-normal">Borrowed</span>
+              <span class="due-date">Due: <span>Nov 02, 2026</span></span>
+            </div>
+          </article>
+
+          <!-- 卡片 4 -->
+          <article class="loan-card" data-title="The Garden Map">
+            <div class="loan-cover cover-garden"></div>
+            <div class="loan-info">
+              <h3 class="loan-title">The Garden Map</h3>
+              <div class="loan-meta">
+                <span>Author: Elian Moss</span>
+                <span>Call No: 712.6 MOS</span>
+              </div>
+            </div>
+            <div class="loan-status">
+              <span class="status-badge badge-normal">Borrowed</span>
+              <span class="due-date">Due: <span>Oct 30, 2026</span></span>
+            </div>
+          </article>
+
+        </section>
+      </div>
+    </main>
+  </div>
+
+  <script>
+    // 简单的搜索过滤功能
+    document.addEventListener("DOMContentLoaded", function () {
+      const searchInput = document.getElementById("loan-search");
+      const cards = Array.from(document.querySelectorAll(".loan-card"));
+
+      searchInput.addEventListener("input", function () {
+        const query = searchInput.value.trim().toLowerCase();
+        
+        cards.forEach(function (card) {
+          const title = card.dataset.title.toLowerCase();
+          const matchesQuery = !query || title.includes(query);
+          card.style.display = matchesQuery ? "" : "none";
+        });
+      });
+    });
+  </script>
+</body>
+</html>

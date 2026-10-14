@@ -1,0 +1,844 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Circulation Console · LibriNova Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#f8f5ed;
+    --paper:#fffdf8;
+    --forest:#1d4a3b;
+    --deep-forest:#12352b;
+    --sage:#dce7d9;
+    --beige-border:#ded7c7;
+    --ink:#24382e;
+    --muted:#6d766d;
+    --gold:#c99545;
+    --alert:#c25e4b;
+    --topbar-h:60px;
+    --sidebar-w:210px;
+  }
+
+  *{box-sizing:border-box;}
+  html{background:var(--ivory);}
+  body{
+    margin:0;
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:"Work Sans",-apple-system,"Segoe UI",sans-serif;
+    font-size:14px;
+  }
+  button,input{font:inherit;}
+  button{cursor:pointer;}
+  h1,h2,h3,.serif{font-family:"Source Serif Pro",Georgia,serif;}
+
+  /* ============ Top bar ============ */
+  .topbar{
+    position:fixed;top:0;left:0;right:0;z-index:30;
+    height:var(--topbar-h);
+    display:flex;align-items:center;justify-content:space-between;
+    gap:18px;padding:0 22px;
+    background:var(--deep-forest);
+    color:#fff;
+    box-shadow:0 2px 12px rgba(18,53,43,.18);
+  }
+  .topbar-brand{display:flex;align-items:center;gap:10px;flex-shrink:0;}
+  .brand-mark{
+    width:32px;height:32px;border-radius:8px;display:grid;place-items:center;
+    background:rgba(255,255,255,.13);
+    color:#fff;
+  }
+  .brand-name{margin:0;font-size:17px;font-weight:700;line-height:1.1;letter-spacing:.01em;}
+  .brand-sub{margin:0;font-size:10px;letter-spacing:.14em;text-transform:uppercase;color:#9dbcaa;font-weight:700;}
+
+  .topbar-right{display:flex;align-items:center;gap:12px;min-width:0;}
+
+  .welcome{
+    font-size:12.5px;color:#cfe0d6;white-space:nowrap;
+  }
+  .welcome b{color:#fff;font-weight:600;}
+
+  .todo-pill{
+    display:inline-flex;align-items:center;gap:7px;
+    height:32px;padding:0 12px;border-radius:20px;
+    border:1px solid rgba(255,255,255,.22);
+    background:rgba(255,255,255,.08);
+    color:#fff;font-size:12px;font-weight:600;white-space:nowrap;
+    transition:background .18s ease,border-color .18s ease;
+  }
+  .todo-pill:hover{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.4);}
+  .todo-pill .dot{
+    min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+    background:var(--gold);color:#2a1c05;
+    font-size:11px;font-weight:700;display:grid;place-items:center;
+  }
+
+  .global-search{position:relative;width:230px;max-width:34vw;}
+  .global-search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);color:#9dbcaa;}
+  .global-search input{
+    width:100%;height:34px;border-radius:8px;
+    border:1px solid rgba(255,255,255,.18);
+    background:rgba(255,255,255,.1);
+    color:#fff;padding:0 12px 0 34px;outline:none;
+    font-size:12.5px;
+    transition:background .18s ease,border-color .18s ease;
+  }
+  .global-search input::placeholder{color:#8fae9d;}
+  .global-search input:focus{background:rgba(255,255,255,.18);border-color:rgba(255,255,255,.5);}
+
+  .logout-btn{
+    height:32px;padding:0 14px;border-radius:7px;
+    border:1px solid rgba(255,255,255,.24);
+    background:transparent;color:#fff;font-size:12px;font-weight:600;
+    white-space:nowrap;transition:background .18s ease,border-color .18s ease;
+  }
+  .logout-btn:hover{background:rgba(255,255,255,.14);border-color:rgba(255,255,255,.45);}
+
+  /* ============ Sidebar ============ */
+  .sidebar{
+    position:fixed;top:var(--topbar-h);left:0;bottom:0;z-index:20;
+    width:var(--sidebar-w);
+    padding:18px 12px 24px;
+    background:#f0eee5;
+    border-right:1px solid var(--beige-border);
+    overflow-y:auto;
+  }
+  .sidebar-title{
+    margin:0 0 10px;padding:0 10px;
+    font-size:10px;font-weight:700;letter-spacing:.14em;
+    color:#8a948a;text-transform:uppercase;
+  }
+  .nav-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:3px;}
+  .nav-link{
+    width:100%;display:flex;align-items:center;gap:10px;
+    padding:10px 11px;border:0;border-radius:7px;
+    background:transparent;color:#3f5a4c;
+    font-size:13px;font-weight:600;text-align:left;
+    transition:background .18s ease,color .18s ease,box-shadow .18s ease;
+  }
+  .nav-link svg{flex-shrink:0;opacity:.85;}
+  .nav-link:hover{background:#e2e7dc;color:var(--deep-forest);}
+  .nav-link.is-active{
+    background:var(--forest);color:#fff;
+    box-shadow:0 5px 12px rgba(29,74,59,.16);
+  }
+  .nav-link.is-active svg{opacity:1;}
+  .nav-link .nav-count{
+    margin-left:auto;font-size:10.5px;font-weight:700;
+    min-width:19px;height:19px;padding:0 5px;border-radius:10px;
+    display:grid;place-items:center;
+    background:#e3d5b6;color:#6b4d13;
+  }
+  .nav-link.is-active .nav-count{background:rgba(255,255,255,.22);color:#fff;}
+
+  .sidebar-foot{
+    margin-top:22px;padding:14px 10px 0;
+    border-top:1px solid #d8d2c4;
+    font-size:11px;line-height:1.7;color:#667267;
+  }
+
+  /* ============ Main ============ */
+  .main{
+    margin-left:var(--sidebar-w);
+    padding:calc(var(--topbar-h) + 22px) 30px 48px 24px;
+  }
+  .main-inner{max-width:1280px;margin:0 auto;}
+
+  .page-head{display:flex;align-items:flex-end;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+  .page-head h1{margin:0;font-size:25px;font-weight:700;color:var(--deep-forest);letter-spacing:.01em;}
+  .page-head p{margin:6px 0 0;font-size:12.5px;color:var(--muted);}
+  .date-chip{
+    display:inline-flex;align-items:center;gap:7px;
+    height:32px;padding:0 13px;border-radius:20px;
+    border:1px solid var(--beige-border);background:var(--paper);
+    font-size:12px;font-weight:600;color:#4d6555;
+  }
+
+  /* --- Stat cards --- */
+  .stat-row{
+    display:grid;grid-template-columns:repeat(3,minmax(0,1fr));
+    gap:14px;margin-top:20px;
+  }
+  .stat-card{
+    background:var(--paper);
+    border:1px solid var(--beige-border);
+    border-radius:10px;
+    padding:18px 20px;
+    box-shadow:0 4px 12px rgba(42,51,39,.045);
+    display:flex;align-items:center;justify-content:space-between;gap:14px;
+    transition:transform .18s ease,box-shadow .18s ease,border-color .18s ease;
+  }
+  .stat-card:hover{transform:translateY(-2px);box-shadow:0 10px 18px rgba(42,51,39,.09);border-color:#acbca8;}
+  .stat-label{margin:0 0 6px;font-size:11.5px;font-weight:700;letter-spacing:.06em;color:#7c867f;}
+  .stat-value{margin:0;font-family:"Source Serif Pro",serif;font-size:32px;font-weight:700;line-height:1;color:var(--deep-forest);}
+  .stat-value.is-alert{color:var(--alert);}
+  .stat-sub{margin:6px 0 0;font-size:11.5px;color:var(--muted);}
+  .stat-sub em{font-style:normal;font-weight:700;color:#2f7a54;}
+  .stat-sub em.down{color:var(--alert);}
+  .stat-icon{
+    width:44px;height:44px;border-radius:11px;flex-shrink:0;
+    display:grid;place-items:center;
+    background:var(--sage);color:var(--forest);
+  }
+  .stat-icon.warn{background:#fbeae7;color:var(--alert);}
+  .stat-icon.gold{background:#f7edd8;color:#8a6218;}
+
+  /* --- To-do bar --- */
+  .todo-bar{
+    margin-top:14px;
+    display:flex;align-items:center;gap:10px;flex-wrap:wrap;
+    background:linear-gradient(180deg,#fffdf8,#faf8f0);
+    border:1px dashed #d9cfb8;
+    border-radius:10px;
+    padding:13px 18px;
+  }
+  .todo-bar .todo-heading{
+    font-size:11px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;
+    color:#8a6218;margin-right:4px;
+  }
+  .todo-item{
+    display:inline-flex;align-items:center;gap:8px;
+    height:30px;padding:0 12px;border-radius:15px;
+    border:1px solid #e4d3ad;background:#fffaf0;
+    color:#6b4d13;font-size:12.5px;font-weight:600;
+    transition:background .18s ease,border-color .18s ease,transform .18s ease;
+  }
+  .todo-item:hover{background:#fbf1dc;border-color:var(--gold);transform:translateY(-1px);}
+  .todo-item .num{
+    min-width:18px;height:18px;padding:0 5px;border-radius:9px;
+    background:var(--gold);color:#2a1c05;
+    font-size:11px;font-weight:700;display:grid;place-items:center;
+  }
+
+  /* --- Quick actions --- */
+  .action-row{
+    display:flex;flex-wrap:wrap;gap:10px;margin-top:16px;
+  }
+  .action-btn{
+    display:inline-flex;align-items:center;gap:8px;
+    height:42px;padding:0 18px;border-radius:8px;
+    border:1px solid var(--beige-border);
+    background:var(--paper);color:var(--forest);
+    font-size:13px;font-weight:600;
+    box-shadow:0 2px 7px rgba(42,51,39,.04);
+    transition:transform .18s ease,background .18s ease,border-color .18s ease,box-shadow .18s ease;
+  }
+  .action-btn:hover{transform:translateY(-2px);border-color:var(--forest);background:#edf3ea;box-shadow:0 8px 15px rgba(42,51,39,.1);}
+  .action-btn.primary{background:var(--forest);border-color:var(--forest);color:#fff;}
+  .action-btn.primary:hover{background:var(--deep-forest);border-color:var(--deep-forest);}
+
+  /* --- Panels --- */
+  .panel-grid{
+    display:grid;grid-template-columns:1.45fr 1fr;gap:16px;margin-top:20px;
+  }
+  .panel{
+    background:var(--paper);
+    border:1px solid var(--beige-border);
+    border-radius:10px;
+    padding:20px 22px 18px;
+    box-shadow:0 4px 12px rgba(42,51,39,.045);
+    min-width:0;
+  }
+  .panel-head{
+    display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    margin-bottom:16px;
+  }
+  .panel-head h2{
+    margin:0;font-size:15px;font-weight:700;color:var(--deep-forest);
+    letter-spacing:.02em;
+  }
+  .panel-head .hint{font-size:11.5px;color:var(--muted);}
+
+  /* Line chart */
+  .chart-wrap{width:100%;overflow:hidden;}
+  .chart-wrap svg{width:100%;height:auto;display:block;}
+  .chart-legend{display:flex;gap:16px;margin-top:10px;font-size:11.5px;color:var(--muted);flex-wrap:wrap;}
+  .chart-legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:middle;}
+
+  /* Top books */
+  .rank-list{list-style:none;margin:0;padding:0;display:flex;flex-direction:column;gap:13px;}
+  .rank-item{display:flex;align-items:center;gap:12px;min-width:0;}
+  .rank-no{
+    width:22px;height:22px;flex-shrink:0;border-radius:6px;
+    display:grid;place-items:center;
+    background:#eef1e9;color:#5a6b5e;
+    font-size:11px;font-weight:700;
+  }
+  .rank-item:nth-child(1) .rank-no{background:var(--gold);color:#fff;}
+  .rank-item:nth-child(2) .rank-no{background:#c8b48a;color:#fff;}
+  .rank-item:nth-child(3) .rank-no{background:#d8cdb6;color:#6b5a34;}
+  .rank-body{flex:1;min-width:0;}
+  .rank-top{display:flex;justify-content:space-between;gap:10px;align-items:baseline;}
+  .rank-title{
+    font-family:"Source Serif Pro",serif;font-size:14px;font-weight:600;color:var(--forest);
+    white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  }
+  .rank-count{font-size:11.5px;font-weight:700;color:#7c867f;white-space:nowrap;}
+  .rank-bar{height:6px;border-radius:3px;background:#eceae1;margin-top:6px;overflow:hidden;}
+  .rank-bar span{display:block;height:100%;border-radius:3px;background:linear-gradient(90deg,#2f6a52,#1d4a3b);}
+
+  /* Footer */
+  .foot-note{
+    margin-top:22px;padding-top:14px;border-top:1px solid var(--beige-border);
+    font-size:11.5px;color:#8a928a;display:flex;justify-content:space-between;gap:12px;flex-wrap:wrap;
+  }
+
+  /* ============ Modal ============ */
+  .modal-backdrop{
+    position:fixed;inset:0;z-index:60;display:none;
+    align-items:center;justify-content:center;padding:20px;
+    background:rgba(18,53,43,.42);
+  }
+  .modal-backdrop.is-open{display:flex;}
+  .modal-panel{
+    width:min(420px,100%);
+    padding:26px 28px;
+    border-radius:12px;background:var(--paper);
+    border:1px solid #e7dfd0;
+    box-shadow:0 22px 50px rgba(18,53,43,.24);
+    animation:rise .2s ease both;
+  }
+  @keyframes rise{from{transform:translateY(10px);opacity:.4;}to{transform:translateY(0);opacity:1;}}
+  .modal-panel .eyebrow{
+    margin:0;font-size:10px;font-weight:700;letter-spacing:.16em;
+    text-transform:uppercase;color:#69806e;
+  }
+  .modal-panel h2{margin:8px 0 10px;font-size:22px;font-weight:600;color:#173b30;}
+  .modal-panel p{margin:0;font-size:13.5px;line-height:1.7;color:#59665c;}
+  .modal-close{
+    margin-top:22px;height:38px;padding:0 18px;border-radius:7px;border:0;
+    background:var(--forest);color:#fff;font-size:12.5px;font-weight:700;
+    transition:background .18s ease;
+  }
+  .modal-close:hover{background:var(--deep-forest);}
+
+  .focus-ring:focus-visible{outline:3px solid rgba(29,74,59,.34);outline-offset:2px;}
+
+  /* ============ Responsive ============ */
+  @media (max-width:1080px){
+    .panel-grid{grid-template-columns:1fr;}
+  }
+  @media (max-width:900px){
+    .topbar{position:static;height:auto;flex-wrap:wrap;padding:12px 16px;gap:10px;}
+    .topbar-right{width:100%;flex-wrap:wrap;gap:8px;}
+    .global-search{width:100%;max-width:none;order:3;}
+    .sidebar{
+      position:static;width:100%;height:auto;overflow:visible;
+      padding:10px 12px;border-right:0;border-bottom:1px solid var(--beige-border);
+    }
+    .sidebar-title,.sidebar-foot{display:none;}
+    .nav-list{flex-direction:row;overflow-x:auto;gap:4px;padding-bottom:4px;}
+    .nav-link{width:auto;white-space:nowrap;flex-shrink:0;}
+    .nav-link .nav-count{margin-left:6px;}
+    .main{margin-left:0;padding:20px 16px 40px;}
+  }
+  @media (max-width:640px){
+    .stat-row{grid-template-columns:1fr;}
+    .page-head h1{font-size:21px;}
+    .action-btn{flex:1 1 calc(50% - 5px);justify-content:center;}
+    .panel{padding:16px;}
+  }
+</style>
+</head>
+<body>
+
+<!-- ==================== Top bar ==================== -->
+<header class="topbar">
+  <div class="topbar-brand">
+    <div class="brand-mark" aria-hidden="true">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+        <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+      </svg>
+    </div>
+    <div>
+      <p class="brand-name">LibriNova</p>
+      <p class="brand-sub">Library Console</p>
+    </div>
+  </div>
+
+  <div class="topbar-right">
+    <span class="welcome">Welcome, <b>Circulation Admin</b></span>
+
+    <button type="button" class="todo-pill focus-ring" id="todoPill" title="View pending tasks">
+      To-do
+      <span class="dot">5</span>
+    </button>
+
+    <div class="global-search">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+        <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+      </svg>
+      <label for="globalSearch" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0,0,0,0);">Global search</label>
+      <input id="globalSearch" type="search" placeholder="Search patrons / books / barcodes">
+    </div>
+
+    <button type="button" class="logout-btn focus-ring" id="logoutBtn">Log Out</button>
+  </div>
+</header>
+
+<!-- ==================== Sidebar ==================== -->
+<aside class="sidebar" aria-label="Admin navigation">
+  <p class="sidebar-title">Menu</p>
+  <nav>
+    <ul class="nav-list">
+      <li>
+        <button type="button" class="nav-link is-active focus-ring" data-page="Dashboard">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="3" width="7" height="9" rx="1.5"></rect>
+            <rect x="14" y="3" width="7" height="5" rx="1.5"></rect>
+            <rect x="14" y="12" width="7" height="9" rx="1.5"></rect>
+            <rect x="3" y="16" width="7" height="5" rx="1.5"></rect>
+          </svg>
+          Dashboard
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="Patron Management">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+            <circle cx="9" cy="7" r="4"></circle>
+            <path d="M22 21v-2a4 4 0 0 0-3-3.87"></path>
+          </svg>
+          Patron Management
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="Collection Management">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+            <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+          </svg>
+          Collection Management
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="Circulation">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 7h13l-3-3"></path>
+            <path d="M21 17H8l3 3"></path>
+          </svg>
+          Circulation
+          <span class="nav-count">5</span>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="Hold Requests">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+            <path d="M8 2v4M16 2v4M3 10h18"></path>
+          </svg>
+          Hold Requests
+          <span class="nav-count">3</span>
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="Reports &amp; Statistics">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M3 3v18h18"></path><path d="M7 15l4-5 3 3 5-7"></path>
+          </svg>
+          Reports &amp; Statistics
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="System Settings">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <circle cx="12" cy="12" r="3"></circle>
+            <path d="M19.4 15a1.7 1.7 0 0 0 .34 1.87l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06A1.7 1.7 0 0 0 15 19.4a1.7 1.7 0 0 0-1 1.55V21a2 2 0 1 1-4 0v-.05A1.7 1.7 0 0 0 9 19.4a1.7 1.7 0 0 0-1.87.34l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06A1.7 1.7 0 0 0 4.6 15a1.7 1.7 0 0 0-1.55-1H3a2 2 0 1 1 0-4h.05A1.7 1.7 0 0 0 4.6 9a1.7 1.7 0 0 0-.34-1.87l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06A1.7 1.7 0 0 0 9 4.6 1.7 1.7 0 0 0 10 3.05V3a2 2 0 1 1 4 0v.05A1.7 1.7 0 0 0 15 4.6a1.7 1.7 0 0 0 1.87-.34l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06A1.7 1.7 0 0 0 19.4 9v.05a1.7 1.7 0 0 0 1.55 1H21a2 2 0 1 1 0 4h-.05a1.7 1.7 0 0 0-1.55 1Z"></path>
+          </svg>
+          System Settings
+        </button>
+      </li>
+      <li>
+        <button type="button" class="nav-link focus-ring" data-page="Audit Logs">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z"></path>
+            <path d="M14 2v6h6"></path><path d="M8 13h8M8 17h5"></path>
+          </svg>
+          Audit Logs
+        </button>
+      </li>
+    </ul>
+  </nav>
+
+  <div class="sidebar-foot">
+    Current shift: Morning 08:30 – 17:00<br>
+    Terminal ID: CIR-DESK-02
+  </div>
+</aside>
+
+<!-- ==================== Main ==================== -->
+<main class="main">
+  <div class="main-inner">
+
+    <div class="page-head">
+      <div>
+        <h1>Circulation Console</h1>
+        <p>Monitor loans, returns, pending tasks and collection activity in real time</p>
+      </div>
+      <span class="date-chip">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <rect x="3" y="4" width="18" height="17" rx="2"></rect>
+          <path d="M8 2v4M16 2v4M3 10h18"></path>
+        </svg>
+        Wed, 7 Oct 2026
+      </span>
+    </div>
+
+    <!-- Today's key figures -->
+    <section class="stat-row" aria-label="Today's circulation figures">
+      <article class="stat-card">
+        <div>
+          <p class="stat-label">CHECKED OUT TODAY</p>
+          <p class="stat-value">32</p>
+          <p class="stat-sub"><em>+6</em> vs. yesterday</p>
+        </div>
+        <div class="stat-icon" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 5v14M5 12l7-7 7 7"></path>
+          </svg>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div>
+          <p class="stat-label">RETURNED TODAY</p>
+          <p class="stat-value">28</p>
+          <p class="stat-sub"><em>4</em> awaiting shelving</p>
+        </div>
+        <div class="stat-icon gold" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M12 19V5M5 12l7 7 7-7"></path>
+          </svg>
+        </div>
+      </article>
+
+      <article class="stat-card">
+        <div>
+          <p class="stat-label">OVERDUE ITEMS</p>
+          <p class="stat-value is-alert">12</p>
+          <p class="stat-sub"><em class="down">3</em> over 30 days</p>
+        </div>
+        <div class="stat-icon warn" aria-hidden="true">
+          <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+            <path d="M10.3 3.9 1.8 18a2 2 0 0 0 1.7 3h17a2 2 0 0 0 1.7-3L13.7 3.9a2 2 0 0 0-3.4 0Z"></path>
+            <path d="M12 9v4M12 17h.01"></path>
+          </svg>
+        </div>
+      </article>
+    </section>
+
+    <!-- To-do -->
+    <section class="todo-bar" aria-label="Pending tasks">
+      <span class="todo-heading">To-do</span>
+      <button type="button" class="todo-item focus-ring" data-modal="Holds Ready for Pickup" data-msg="3 held items are now available for pickup. Please notify patrons by phone or SMS within 3 days, after which the hold will roll over to the next in queue.">
+        Holds ready for pickup <span class="num">3</span>
+      </button>
+      <button type="button" class="todo-item focus-ring" data-modal="Outstanding Fines" data-msg="2 overdue fines are awaiting collection, totalling $14.00. Go to Patron Management → Fees to record payment or waive the charge.">
+        Outstanding fines <span class="num">2</span>
+      </button>
+    </section>
+
+    <!-- Quick actions -->
+    <section class="action-row" aria-label="Quick actions">
+      <button type="button" class="action-btn primary focus-ring" data-modal="Check Out" data-msg="Scan the patron card or enter the patron ID, then scan the item barcode to complete the loan. The standard loan period is 30 days, with up to 2 renewals.">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+        </svg>
+        Check Out
+      </button>
+
+      <button type="button" class="action-btn focus-ring" data-modal="Check In" data-msg="Scan the item barcode to complete the return. Any overdue charge will be calculated automatically and added to the pending queue.">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M19 21H6a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h13v18Z"></path>
+          <path d="m14 3v7l-2-1.5L10 10V3"></path>
+        </svg>
+        Check In
+      </button>
+
+      <button type="button" class="action-btn focus-ring" data-modal="Patron Lookup" data-msg="Search patrons by name, email or phone number to view loans, holds and fee details.">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"></path>
+          <circle cx="9" cy="7" r="4"></circle>
+        </svg>
+        Patron Lookup
+      </button>
+
+      <button type="button" class="action-btn focus-ring" data-modal="Item Lookup" data-msg="Search the collection by title, author, ISBN or call number, and check shelf status across branches.">
+        <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <circle cx="11" cy="11" r="7"></circle><path d="m20 20-3.5-3.5"></path>
+        </svg>
+        Item Lookup
+      </button>
+    </section>
+
+    <!-- Chart + ranking -->
+    <section class="panel-grid">
+
+      <!-- Circulation trend -->
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Circulation Trend</h2>
+          <span class="hint">Last 7 days · items</span>
+        </div>
+
+        <div class="chart-wrap">
+          <svg viewBox="0 0 600 220" role="img" aria-label="Seven-day circulation trend: Mon 24, Tue 31, Wed 28, Thu 35, Fri 42, Sat 26, Sun 32">
+            <defs>
+              <linearGradient id="areaFill" x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stop-color="#1d4a3b" stop-opacity="0.22"/>
+                <stop offset="100%" stop-color="#1d4a3b" stop-opacity="0"/>
+              </linearGradient>
+            </defs>
+
+            <!-- Grid lines -->
+            <g stroke="#e6e2d6" stroke-width="1">
+              <line x1="40" y1="46"  x2="570" y2="46"/>
+              <line x1="40" y1="94"  x2="570" y2="94"/>
+              <line x1="40" y1="142" x2="570" y2="142"/>
+              <line x1="40" y1="190" x2="570" y2="190"/>
+            </g>
+
+            <!-- Y-axis labels -->
+            <g fill="#9aa39a" font-size="10" font-family="Work Sans, sans-serif" text-anchor="end">
+              <text x="32" y="50">45</text>
+              <text x="32" y="98">30</text>
+              <text x="32" y="146">15</text>
+              <text x="32" y="194">0</text>
+            </g>
+
+            <!-- Area -->
+            <path d="M45,113.2 L130,90.8 L215,100.4 L300,78 L385,55.6 L470,106.8 L555,87.6 L555,190 L45,190 Z"
+                  fill="url(#areaFill)"/>
+
+            <!-- Line -->
+            <path d="M45,113.2 L130,90.8 L215,100.4 L300,78 L385,55.6 L470,106.8 L555,87.6"
+                  fill="none" stroke="#1d4a3b" stroke-width="2.5"
+                  stroke-linecap="round" stroke-linejoin="round"/>
+
+            <!-- Data points -->
+            <g fill="#fffdf8" stroke="#1d4a3b" stroke-width="2.5">
+              <circle cx="45"  cy="113.2" r="4"/>
+              <circle cx="130" cy="90.8"  r="4"/>
+              <circle cx="215" cy="100.4" r="4"/>
+              <circle cx="300" cy="78"    r="4"/>
+              <circle cx="385" cy="55.6"  r="4"/>
+              <circle cx="470" cy="106.8" r="4"/>
+              <circle cx="555" cy="87.6"  r="4"/>
+            </g>
+
+            <!-- Values -->
+            <g fill="#3f5a4c" font-size="10.5" font-weight="600" font-family="Work Sans, sans-serif" text-anchor="middle">
+              <text x="45"  y="102">24</text>
+              <text x="130" y="80">31</text>
+              <text x="215" y="89">28</text>
+              <text x="300" y="67">35</text>
+              <text x="385" y="45">42</text>
+              <text x="470" y="96">26</text>
+              <text x="555" y="77">32</text>
+            </g>
+
+            <!-- X-axis labels -->
+            <g fill="#8a928a" font-size="10.5" font-family="Work Sans, sans-serif" text-anchor="middle">
+              <text x="45"  y="212">Mon</text>
+              <text x="130" y="212">Tue</text>
+              <text x="215" y="212">Wed</text>
+              <text x="300" y="212">Thu</text>
+              <text x="385" y="212">Fri</text>
+              <text x="470" y="212">Sat</text>
+              <text x="555" y="212">Sun</text>
+            </g>
+          </svg>
+        </div>
+
+        <div class="chart-legend">
+          <span><i style="background:#1d4a3b"></i>Items checked out</span>
+          <span><i style="background:#dce7d9"></i>Daily average 31</span>
+          <span>Peak: Friday, 42 items</span>
+        </div>
+      </article>
+
+      <!-- Top borrowed books -->
+      <article class="panel">
+        <div class="panel-head">
+          <h2>Top Borrowed Books</h2>
+          <span class="hint">Loans in the last 30 days</span>
+        </div>
+
+        <ol class="rank-list">
+          <li class="rank-item">
+            <span class="rank-no">1</span>
+            <div class="rank-body">
+              <div class="rank-top">
+                <span class="rank-title">The Paper Moon</span>
+                <span class="rank-count">48 loans</span>
+              </div>
+              <div class="rank-bar"><span style="width:100%"></span></div>
+            </div>
+          </li>
+          <li class="rank-item">
+            <span class="rank-no">2</span>
+            <div class="rank-body">
+              <div class="rank-top">
+                <span class="rank-title">Quiet Tide</span>
+                <span class="rank-count">41 loans</span>
+              </div>
+              <div class="rank-bar"><span style="width:85%"></span></div>
+            </div>
+          </li>
+          <li class="rank-item">
+            <span class="rank-no">3</span>
+            <div class="rank-body">
+              <div class="rank-top">
+                <span class="rank-title">The Last Orchard</span>
+                <span class="rank-count">36 loans</span>
+              </div>
+              <div class="rank-bar"><span style="width:75%"></span></div>
+            </div>
+          </li>
+          <li class="rank-item">
+            <span class="rank-no">4</span>
+            <div class="rank-body">
+              <div class="rank-top">
+                <span class="rank-title">The Garden Map</span>
+                <span class="rank-count">29 loans</span>
+              </div>
+              <div class="rank-bar"><span style="width:60%"></span></div>
+            </div>
+          </li>
+          <li class="rank-item">
+            <span class="rank-no">5</span>
+            <div class="rank-body">
+              <div class="rank-top">
+                <span class="rank-title">Margins of Light</span>
+                <span class="rank-count">22 loans</span>
+              </div>
+              <div class="rank-bar"><span style="width:46%"></span></div>
+            </div>
+          </li>
+        </ol>
+      </article>
+
+    </section>
+
+    <p class="foot-note">
+      <span>Data syncs automatically every 5 minutes · Last sync 09:35</span>
+      <span>LibriNova Circulation System v3.4</span>
+    </p>
+
+  </div>
+</main>
+
+<!-- ==================== Modal ==================== -->
+<div class="modal-backdrop" id="actionModal" role="dialog" aria-modal="true" aria-labelledby="modalTitle">
+  <div class="modal-panel">
+    <p class="eyebrow">LibriNova · Circulation Desk</p>
+    <h2 id="modalTitle">Notice</h2>
+    <p id="modalMessage"></p>
+    <button type="button" class="modal-close focus-ring" id="modalClose">Got it</button>
+  </div>
+</div>
+
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+  /* ---------- Modal ---------- */
+  var modal        = document.getElementById("actionModal");
+  var modalTitle   = document.getElementById("modalTitle");
+  var modalMessage = document.getElementById("modalMessage");
+  var modalClose   = document.getElementById("modalClose");
+  var lastTrigger  = null;
+
+  function openModal(title, message, trigger) {
+    lastTrigger = trigger || null;
+    modalTitle.textContent = title;
+    modalMessage.textContent = message;
+    modal.classList.add("is-open");
+    modalClose.focus();
+  }
+  function closeModal() {
+    modal.classList.remove("is-open");
+    if (lastTrigger) lastTrigger.focus();
+  }
+
+  document.querySelectorAll("[data-modal]").forEach(function (el) {
+    el.addEventListener("click", function () {
+      openModal(el.dataset.modal, el.dataset.msg, el);
+    });
+  });
+
+  modalClose.addEventListener("click", closeModal);
+  modal.addEventListener("click", function (e) {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", function (e) {
+    if (e.key === "Escape" && modal.classList.contains("is-open")) closeModal();
+  });
+
+  /* ---------- Sidebar navigation ---------- */
+  var navLinks = document.querySelectorAll(".nav-link");
+  navLinks.forEach(function (link) {
+    link.addEventListener("click", function () {
+      navLinks.forEach(function (item) {
+        item.classList.remove("is-active");
+        item.removeAttribute("aria-current");
+      });
+      link.classList.add("is-active");
+      link.setAttribute("aria-current", "page");
+
+      if (link.dataset.page !== "Dashboard") {
+        openModal(
+          link.dataset.page,
+          "\u201C" + link.dataset.page + "\u201D is loading. This demo only shows dashboard data.",
+          link
+        );
+      }
+    });
+  });
+
+  /* ---------- Top bar to-do ---------- */
+  document.getElementById("todoPill").addEventListener("click", function () {
+    openModal(
+      "Today's To-do (5)",
+      "3 holds ready for pickup · 2 fines awaiting collection. Please prioritise the 3 items overdue by more than 30 days.",
+      this
+    );
+  });
+
+  /* ---------- Log out ---------- */
+  document.getElementById("logoutBtn").addEventListener("click", function () {
+    openModal("Log Out", "Are you sure you want to log out of the circulation admin account? Unsaved check-in / check-out actions will be lost.", this);
+  });
+
+  /* ---------- Global search ---------- */
+  var globalSearch = document.getElementById("globalSearch");
+  globalSearch.addEventListener("keydown", function (e) {
+    if (e.key === "Enter" && globalSearch.value.trim()) {
+      openModal(
+        "Global Search",
+        "Searching for \u201C" + globalSearch.value.trim() + "\u201D… This demo is not connected to a live data source.",
+        globalSearch
+      );
+    }
+  });
+
+});
+</script>
+<style>
+.ops-view{background:#fffdf8;border:1px solid #ded7c7;border-radius:12px;padding:22px;margin-top:20px}.ops-view form{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:12px;margin:18px 0}.ops-view label{display:grid;gap:6px;font-weight:600;font-size:12px}.ops-view input,.ops-view select{height:38px;border:1px solid #ded7c7;border-radius:6px;padding:0 9px}.ops-view button,.ops-button{height:38px;border:0;border-radius:6px;background:#1d4a3b;color:white;padding:0 12px;font-weight:700;cursor:pointer}.ops-view table{width:100%;border-collapse:collapse}.ops-view td,.ops-view th{text-align:left;padding:9px;border-bottom:1px solid #eee;font-size:12px}
+</style><script>
+document.addEventListener('DOMContentLoaded',function(){
+ const main=document.querySelector('.main-inner'),nav=document.querySelectorAll('.nav-link'),original=Array.from(main.children);const view=document.createElement('section');view.className='ops-view';view.hidden=true;main.appendChild(view);
+ function get(k){try{return JSON.parse(localStorage.getItem('lib_'+k)||'[]')}catch(e){return []}}function put(k,v){localStorage.setItem('lib_'+k,JSON.stringify(v))}function iso(d){return new Date(d.getTime()-d.getTimezoneOffset()*60000).toISOString().slice(0,10)}
+ function activate(page){original.forEach(x=>x.hidden=true);view.hidden=false;nav.forEach(x=>{x.classList.toggle('is-active',x.dataset.page===page);if(x.dataset.page===page)x.setAttribute('aria-current','page');else x.removeAttribute('aria-current')});document.querySelector('.page-head h1').textContent=page==='Circulation'?'On-Site Reading Desk':'Collection Management · Acquisition Desk';
+ if(page==='Collection Management'){const rows=get('acq');view.innerHTML='<h2>Receive New Acquisition</h2><p>Record incoming books; demo records and generated barcodes are saved in this browser.</p><form id="acq"><label>Supplier / Donor<select name="source"><option>Gramedia Distribution</option><option>Alumni Foundation</option><option>Periplus</option></select></label><label>Book title / ISBN<input name="book" required></label><label>Quantity received<input name="quantity" type="number" min="1" value="1" required></label><label>Unit cost<input name="cost" type="number" min="0" step=".01"></label><label>Acquisition date<input name="date" type="date" value="'+iso(new Date())+'" required></label><button>Process Acquisition &amp; Generate Barcodes</button></form><p id="feedback" role="status"></p><h3>Recent Acquisitions</h3><table><thead><tr><th>Date</th><th>Supplier</th><th>Book</th><th>Qty</th><th>Unit cost</th><th>Generated barcodes</th></tr></thead><tbody>'+rows.map(r=>'<tr><td>'+r.date+'</td><td>'+r.source+'</td><td>'+r.book+'</td><td>'+r.quantity+'</td><td>'+r.cost+'</td><td>'+r.codes+'</td></tr>').join('')+'</tbody></table>';document.getElementById('acq').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target),n=+(f.get('quantity')||1),seq=+(localStorage.getItem('lib_seq')||1000),codes=[];let next=seq;for(let i=0;i<n;i++)codes.push('BC-'+(++next));localStorage.setItem('lib_seq',next);rows.push({date:f.get('date'),source:f.get('source'),book:f.get('book'),quantity:n,cost:f.get('cost')||'—',codes:codes.join(', ')});put('acq',rows);activate(page);document.getElementById('feedback').textContent='Saved. Barcodes generated: '+codes.join(', ');};}
+ else{const rows=get('reading'),active=rows.filter(r=>!r.end);view.innerHTML='<h2>On-Site Reading Session</h2><p>Log in-library reading separately from off-site borrowing.</p><form id="reading"><label>Visitor ID / Name<input name="visitor" required></label><label>Copy barcode<input name="barcode" required></label><button>Start Session</button></form><h3>Currently Reading Inside</h3><table><thead><tr><th>Visitor</th><th>Barcode</th><th>Started</th><th>Action</th></tr></thead><tbody>'+active.map((r,i)=>'<tr><td>'+r.visitor+'</td><td>'+r.barcode+'</td><td>'+r.start+'</td><td><button type="button" data-end="'+i+'">End Session / Return to Shelf</button></td></tr>').join('')+'</tbody></table>';document.getElementById('reading').onsubmit=e=>{e.preventDefault();const f=new FormData(e.target);rows.push({visitor:f.get('visitor'),barcode:f.get('barcode'),start:new Date().toLocaleString(),end:''});put('reading',rows);activate(page)};view.querySelectorAll('[data-end]').forEach(b=>b.onclick=()=>{const entry=active[+b.dataset.end],idx=rows.findIndex(r=>!r.end&&r.barcode===entry.barcode&&r.visitor===entry.visitor);if(idx>=0){rows[idx].end=new Date().toLocaleString();put('reading',rows);activate(page)}});}}
+ nav.forEach(b=>b.addEventListener('click',function(e){if(['Collection Management','Circulation'].includes(b.dataset.page)){e.stopImmediatePropagation();e.preventDefault();activate(b.dataset.page)}else if(b.dataset.page==='Dashboard'){original.forEach(x=>x.hidden=false);view.hidden=true;document.querySelector('.page-head h1').textContent='Circulation Console'}},true));
+ document.addEventListener('click',function(e){const b=e.target.closest('[data-modal]');if(!b||!['Check Out','Check In'].includes(b.dataset.modal))return;e.stopImmediatePropagation();e.preventDefault();const m=document.getElementById('actionModal'),title=document.getElementById('modalTitle'),body=document.getElementById('modalBody');title.textContent=b.dataset.modal;const out=b.dataset.modal==='Check Out';let due=new Date();due.setDate(due.getDate()+30);body.innerHTML=out?'<form id="loanForm"><label>Patron ID<input name="user" required></label><label>Copy barcode<input name="barcode" required></label><label>Borrow date<input name="borrow" type="date" value="'+iso(new Date())+'" required></label><label>Due date<input name="due" type="date" value="'+iso(due)+'" required></label><p id="result"></p><button class="ops-button">Complete Check Out</button></form>':'<form id="returnForm"><label>Copy barcode<input name="barcode" required></label><label>Return date<input name="date" type="date" value="'+iso(new Date())+'" required></label><p id="result"></p><button class="ops-button">Complete Check In</button></form>';m.classList.add('is-open');const form=body.querySelector('form');form.onsubmit=e=>{e.preventDefault();const f=new FormData(form),loans=get('loans'),res=document.getElementById('result');if(out){if(loans.some(x=>x.barcode===f.get('barcode')&&!x.returnDate)){res.textContent='This copy already has an active loan.';return}loans.push({user:f.get('user'),barcode:f.get('barcode'),borrow:f.get('borrow'),due:f.get('due'),returnDate:''});put('loans',loans);res.textContent='Check out saved. Due '+f.get('due')+'.'}else{const loan=loans.slice().reverse().find(x=>x.barcode===f.get('barcode')&&!x.returnDate);if(!loan){res.textContent='No active loan found for this barcode.';return}loan.returnDate=f.get('date');const days=Math.max(0,Math.floor((new Date(f.get('date'))-new Date(loan.due))/86400000));put('loans',loans);if(days){const fines=get('fines'),fine={borrow_id:loan.barcode,days:days,amount:(days*.5).toFixed(2),status:'Pending'};if(confirm('Late by '+days+' days. Fine: $'+fine.amount+'. Collect fine?'))fine.status='Paid';fines.push(fine);put('fines',fines);res.textContent='Return saved; fine $'+fine.amount+' '+fine.status+'.'}else res.textContent='Returned on time; copy is available.'}}};
+});
+</script>
+</body>
+</html>

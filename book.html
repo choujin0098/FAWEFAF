@@ -1,0 +1,765 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Book Details · LibriNova Library</title>
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+Pro:wght@400;600;700&family=Work+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ivory:#f8f5ed;
+    --paper:#fffdf8;
+    --forest:#1d4a3b;
+    --deep-forest:#12352b;
+    --sage:#dce7d9;
+    --beige-border:#ded7c7;
+    --ink:#24382e;
+    --muted:#6d766d;
+    --gold:#c99545;
+    --alert:#c25e4b;
+  }
+  *{box-sizing:border-box;}
+  html{background:var(--ivory);}
+  body{
+    margin:0;
+    background:var(--ivory);
+    color:var(--ink);
+    font-family:"Work Sans",-apple-system,"Segoe UI",sans-serif;
+    font-size:14px;
+    min-height:100vh;
+  }
+  button,input{font:inherit;}
+  button{cursor:pointer;}
+  h1,h2,h3,.serif{font-family:"Source Serif Pro",Georgia,serif;}
+
+  /* ---------- Header ---------- */
+  .site-header{
+    position:sticky;top:0;z-index:30;
+    background:var(--deep-forest);
+    color:#fff;
+    box-shadow:0 2px 12px rgba(18,53,43,.18);
+  }
+  .header-inner{
+    max-width:1120px;margin:0 auto;
+    height:60px;padding:0 24px;
+    display:flex;align-items:center;justify-content:space-between;gap:16px;
+  }
+  .brand{
+    display:flex;align-items:center;gap:10px;
+    text-decoration:none;color:#fff;flex-shrink:0;
+  }
+  .brand-mark{
+    width:32px;height:32px;border-radius:8px;flex-shrink:0;
+    display:grid;place-items:center;
+    background:rgba(255,255,255,.13);
+  }
+  .brand-name{
+    display:block;font-family:"Source Serif Pro",Georgia,serif;
+    font-size:17px;font-weight:700;line-height:1.1;
+  }
+  .brand-sub{
+    display:block;font-size:10px;letter-spacing:.14em;
+    text-transform:uppercase;color:#9dbcaa;font-weight:700;
+  }
+  .header-links{display:flex;align-items:center;gap:8px;flex-wrap:wrap;}
+  .header-links a{
+    display:inline-flex;align-items:center;height:32px;
+    padding:0 13px;border-radius:7px;
+    border:1px solid rgba(255,255,255,.22);
+    color:#fff;font-size:12px;font-weight:600;
+    text-decoration:none;white-space:nowrap;
+    transition:background .18s ease,border-color .18s ease;
+  }
+  .header-links a:hover{background:rgba(255,255,255,.16);border-color:rgba(255,255,255,.45);}
+
+  /* ---------- Layout ---------- */
+  .app{max-width:1120px;margin:0 auto;padding:26px 24px 64px;}
+
+  .breadcrumb{
+    display:flex;align-items:center;gap:8px;
+    font-size:12px;color:var(--muted);margin-bottom:20px;flex-wrap:wrap;
+  }
+  .breadcrumb a{color:var(--forest);font-weight:600;text-decoration:none;}
+  .breadcrumb a:hover{text-decoration:underline;}
+  .breadcrumb span{color:#b3b8ae;}
+
+  /* ---------- 封面 ---------- */
+  .book-cover{
+    position:relative;
+    width:100%;
+    aspect-ratio:3 / 4.05;
+    border-radius:8px;
+    overflow:hidden;
+    box-shadow:0 10px 24px rgba(20,43,34,.16);
+    display:flex;flex-direction:column;justify-content:space-between;
+    padding:18px;
+    transition:transform .2s ease,box-shadow .2s ease;
+  }
+  .book-cover::after{
+    content:"";position:absolute;inset:0;
+    border:1px solid rgba(255,255,255,.18);
+    border-radius:8px;pointer-events:none;
+  }
+  .cover-tag{
+    font-size:9px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.2em;
+    opacity:.95;
+  }
+  .cover-title{
+    font-family:"Source Serif Pro",Georgia,serif;
+    font-size:clamp(18px,2.1vw,26px);
+    font-weight:600;line-height:.95;
+    letter-spacing:.01em;
+  }
+  .cover-foot{
+    font-size:9px;text-transform:uppercase;letter-spacing:.14em;
+    opacity:.9;
+  }
+
+  /* ---------- 详情 ---------- */
+  .detail{
+    display:grid;
+    grid-template-columns:250px 1fr;
+    gap:46px;
+    align-items:start;
+  }
+  .detail-left{display:flex;flex-direction:column;gap:18px;}
+  .cover-lg{width:100%;}
+
+  .copy-list{margin:14px 0 0;border-top:1px solid #ebe6da;padding-top:12px}.copy-list h3{margin:0 0 8px;font-size:14px;color:var(--deep-forest)}.copy-list table{width:100%;border-collapse:collapse;font-size:12px}.copy-list th,.copy-list td{text-align:left;padding:7px 5px;border-bottom:1px solid #f0ece4}.copy-picker{display:none;margin-top:12px;padding:14px;border:1px solid var(--beige-border);border-radius:8px;background:#fffdf8}.copy-picker.is-open{display:block}.copy-picker label{display:grid;gap:7px;font-size:12px;font-weight:700}.copy-picker select{height:38px;border:1px solid var(--beige-border);border-radius:6px;padding:0 8px;background:white}.copy-picker p{font-size:12px;color:var(--muted)}
+  .status-card{
+    background:var(--paper);
+    border:1px solid var(--beige-border);
+    border-radius:10px;
+    padding:14px 16px;
+    box-shadow:0 4px 12px rgba(42,51,39,.045);
+    display:flex;flex-direction:column;gap:9px;
+  }
+  .status-row{display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:12px;}
+  .status-row .label{color:var(--muted);font-weight:600;}
+  .status-row .value{font-weight:700;color:var(--ink);text-align:right;}
+
+  .badge{
+    display:inline-flex;align-items:center;gap:6px;
+    height:24px;padding:0 11px;border-radius:13px;
+    font-size:11px;font-weight:700;
+    text-transform:uppercase;letter-spacing:.05em;
+  }
+  .badge.available{background:var(--sage);color:var(--deep-forest);}
+  .badge.limited{background:#f7edd8;color:#8a6218;}
+  .badge.out{background:#fbeae7;color:var(--alert);}
+  .badge i{width:6px;height:6px;border-radius:50%;background:currentColor;}
+
+  .btn-primary{
+    width:100%;height:46px;border:0;border-radius:9px;
+    background:var(--forest);color:#fff;
+    font-size:13.5px;font-weight:700;
+    box-shadow:0 8px 18px rgba(29,74,59,.18);
+    transition:background .18s ease,transform .18s ease,box-shadow .18s ease;
+  }
+  .btn-primary:hover{background:var(--deep-forest);transform:translateY(-1px);box-shadow:0 12px 22px rgba(29,74,59,.22);}
+  .btn-primary:disabled{
+    background:#c9cfc7;color:#f4f4f1;cursor:not-allowed;
+    box-shadow:none;transform:none;
+  }
+  .btn-ghost{
+    width:100%;height:42px;border-radius:9px;
+    border:1px solid var(--beige-border);background:transparent;
+    color:var(--forest);font-size:12.5px;font-weight:700;
+    transition:background .18s ease,border-color .18s ease;
+  }
+  .btn-ghost:hover{background:#edf3ea;border-color:var(--forest);}
+
+  .eyebrow{
+    margin:0 0 10px;font-size:10px;font-weight:700;
+    letter-spacing:.16em;text-transform:uppercase;color:#69806e;
+  }
+  .detail-right h1{
+    margin:0;
+    font-size:clamp(26px,3.2vw,36px);
+    line-height:1.12;font-weight:700;color:var(--deep-forest);
+    letter-spacing:.01em;
+  }
+  .byline{
+    margin:12px 0 0;font-size:14px;color:#4d6555;
+  }
+  .byline strong{color:var(--forest);font-weight:700;}
+
+  .rating-row{
+    display:flex;align-items:center;gap:10px;
+    margin-top:14px;font-size:12.5px;color:var(--muted);flex-wrap:wrap;
+  }
+  .stars{display:inline-flex;gap:2px;color:var(--gold);}
+
+  .summary{
+    margin:22px 0 0;
+    font-size:14.5px;line-height:1.8;color:#3f5147;
+  }
+
+  .meta-grid{
+    margin:26px 0 0;padding:22px 0 0;
+    border-top:1px solid var(--beige-border);
+    display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));
+    gap:18px 26px;
+  }
+  .meta-item .k{
+    margin:0 0 5px;font-size:10.5px;font-weight:700;
+    letter-spacing:.1em;text-transform:uppercase;color:#8a928a;
+  }
+  .meta-item .v{
+    margin:0;font-size:13.5px;font-weight:600;color:var(--ink);
+    word-break:break-word;
+  }
+
+  .subjects{margin-top:26px;display:flex;flex-wrap:wrap;gap:8px;}
+  .subject-chip{
+    display:inline-flex;align-items:center;
+    height:28px;padding:0 13px;border-radius:14px;
+    background:#eef1e9;color:#4d6555;
+    font-size:12px;font-weight:600;
+  }
+
+  .extra-note{
+    margin-top:24px;padding:15px 18px;
+    border-left:3px solid var(--gold);
+    background:#fffaf0;border-radius:0 8px 8px 0;
+    font-size:12.5px;line-height:1.7;color:#6b4d13;
+  }
+
+  /* ---------- 目录 ---------- */
+  .catalogue-head{margin-bottom:6px;}
+  .catalogue-head h1{
+    margin:0;font-size:28px;font-weight:700;color:var(--deep-forest);
+  }
+  .catalogue-head p{margin:8px 0 0;font-size:13px;color:var(--muted);}
+
+  .catalogue-grid{
+    margin-top:26px;
+    display:grid;
+    grid-template-columns:repeat(auto-fill,minmax(170px,1fr));
+    gap:26px 22px;
+  }
+  .book-card{
+    display:block;border:0;background:transparent;padding:0;
+    text-align:left;text-decoration:none;color:inherit;min-width:0;
+  }
+  .book-card:hover .book-cover{
+    transform:translateY(-4px);
+    box-shadow:0 16px 26px rgba(20,43,34,.2);
+  }
+  .book-card:focus-visible{outline:3px solid rgba(29,74,59,.32);outline-offset:6px;border-radius:9px;}
+  .book-card h3{
+    margin:12px 0 0;font-size:15px;font-weight:600;
+    line-height:1.3;color:var(--forest);
+  }
+  .book-card p{margin:4px 0 0;font-size:11.5px;color:var(--muted);}
+
+  /* ---------- Not found ---------- */
+  .not-found{
+    max-width:520px;margin:60px auto;text-align:center;
+    background:var(--paper);border:1px solid var(--beige-border);
+    border-radius:14px;padding:44px 34px;
+    box-shadow:0 12px 32px rgba(42,51,39,.07);
+  }
+  .not-found h1{margin:0;font-size:26px;color:var(--deep-forest);}
+  .not-found p{margin:12px 0 0;font-size:13.5px;line-height:1.75;color:var(--muted);}
+  .not-found a{
+    display:inline-flex;align-items:center;gap:8px;
+    margin-top:24px;height:42px;padding:0 20px;border-radius:8px;
+    background:var(--forest);color:#fff;font-size:13px;font-weight:700;
+    text-decoration:none;transition:background .18s ease;
+  }
+  .not-found a:hover{background:var(--deep-forest);}
+
+  /* ---------- Toast ---------- */
+  .toast{
+    position:fixed;left:50%;bottom:28px;transform:translate(-50%,20px);
+    z-index:80;opacity:0;pointer-events:none;
+    background:var(--deep-forest);color:#fff;
+    padding:13px 22px;border-radius:9px;
+    font-size:13px;font-weight:600;
+    box-shadow:0 14px 32px rgba(18,53,43,.28);
+    transition:opacity .22s ease,transform .22s ease;
+    max-width:calc(100vw - 40px);text-align:center;
+  }
+  .toast.show{opacity:1;transform:translate(-50%,0);}
+
+  .focus-ring:focus-visible{outline:3px solid rgba(29,74,59,.34);outline-offset:2px;}
+
+  /* ---------- 响应式 ---------- */
+  @media (max-width:820px){
+    .detail{grid-template-columns:1fr;gap:30px;}
+    .detail-left{max-width:240px;}
+    .app{padding:22px 18px 50px;}
+    .header-inner{padding:0 18px;height:auto;min-height:60px;flex-wrap:wrap;padding-top:10px;padding-bottom:10px;}
+  }
+  @media (max-width:480px){
+    .catalogue-grid{grid-template-columns:repeat(auto-fill,minmax(130px,1fr));gap:20px 14px;}
+    .meta-grid{grid-template-columns:1fr 1fr;}
+  }
+</style>
+</head>
+<body>
+
+<header class="site-header">
+  <div class="header-inner">
+    <a class="brand" href="afsf.html">
+      <span class="brand-mark" aria-hidden="true">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+          <path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"></path>
+          <path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2Z"></path>
+        </svg>
+      </span>
+      <span>
+        <span class="brand-name">LibriNova</span>
+        <span class="brand-sub">Public Library</span>
+      </span>
+    </a>
+    <nav class="header-links">
+      <a href="?">All Books</a>
+      <a href="afsf.html">Home</a>
+      <a href="patron-login.html">My Account</a>
+    </nav>
+  </div>
+</header>
+
+<main id="app" class="app"></main>
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* =========================================================
+   1. 主题（封面渐变）
+   ========================================================= */
+var THEMES = {
+  moon:    { bg:"linear-gradient(145deg,#183c45 0%,#285d5d 57%,#d5b865 57%,#d5b865 61%,#f1e5ba 61%)", text:"#f6efd9" },
+  orchard: { bg:"linear-gradient(160deg,#c9533d 0%,#dc7856 62%,#f5dca9 62%)", text:"#fff4da" },
+  margins: { bg:"linear-gradient(135deg,#ede4d0,#d9c8a8)", text:"#4b493f" },
+  tide:    { bg:"linear-gradient(155deg,#163e67 0%,#387ca0 58%,#dce6d8 58%)", text:"#f5f4df" },
+  garden:  { bg:"linear-gradient(145deg,#243d2f 0%,#54734a 55%,#c9aa59 55%)", text:"#fbf1cf" },
+  station: { bg:"linear-gradient(145deg,#593d4a 0%,#a26d75 60%,#e5c8a3 60%)", text:"#fff4e0" },
+  field:   { bg:"linear-gradient(145deg,#d5b454 0%,#e8d583 58%,#496151 58%)", text:"#324a3b" },
+  letters: { bg:"linear-gradient(145deg,#d9d1c1 0%,#f6f0e3 60%,#6c8876 60%)", text:"#385648" }
+};
+
+/* =========================================================
+   2. 书籍数据 —— 加书只改这里
+   ========================================================= */
+var BOOKS = {
+  "paper-moon": {
+    title: "The Paper Moon",
+    author: "Clara Wren",
+    theme: "moon",
+    coverTag: "Fiction",
+    coverLines: "THE<br>PAPER<br>MOON",
+    coverFoot: "A novel",
+    category: "Fiction",
+    isbn: "978-1-2345-6789-0",
+    callNo: "FIC WRE",
+    year: 2024,
+    pages: 312,
+    publisher: "Ashgrove Press",
+    language: "English",
+    rating: 4.6,
+    reviews: 128,
+    status: "available",
+    copies: "3 of 5 available",
+    location: "Main Reading Room · Shelf F-12",
+    dueBack: "Oct 24, 2026",
+    summary: "In a coastal town where nothing stays buried for long, a young archivist inherits a box of letters that were never meant to be read. As she pieces together a decades-old disappearance, she discovers that the quietest lives often hide the loudest secrets.",
+    subjects: ["Literary Fiction", "Memory", "Small Towns", "Family Secrets"]
+  },
+
+  "last-orchard": {
+    title: "The Last Orchard",
+    author: "Mara Ellis",
+    theme: "orchard",
+    coverTag: "Literary Fiction",
+    coverLines: "THE LAST<br>ORCHARD",
+    coverFoot: "Mara Ellis",
+    category: "Literary Fiction",
+    isbn: "978-1-2345-6790-6",
+    callNo: "FIC ELL",
+    year: 2023,
+    pages: 288,
+    publisher: "Fern & Field",
+    language: "English",
+    rating: 4.4,
+    reviews: 96,
+    status: "limited",
+    copies: "1 of 4 available",
+    location: "Main Reading Room · Shelf F-08",
+    dueBack: "Oct 10, 2026",
+    summary: "Three siblings return to the family orchard one final season before it is sold. Over a summer of harvests, arguments and old wounds, they must decide what is worth keeping — and what has already been lost.",
+    subjects: ["Family", "Rural Life", "Siblings", "Memory"]
+  },
+
+  "margins-of-light": {
+    title: "Margins of Light",
+    author: "Iris Bell",
+    theme: "margins",
+    coverTag: "Essays",
+    coverLines: "MARGINS<br>OF LIGHT",
+    coverFoot: "Iris Bell",
+    category: "Essays",
+    isbn: "978-1-2345-6791-3",
+    callNo: "814 BEL",
+    year: 2025,
+    pages: 224,
+    publisher: "Quiet House Books",
+    language: "English",
+    rating: 4.7,
+    reviews: 74,
+    status: "available",
+    copies: "4 of 4 available",
+    location: "Reading Room · Shelf E-03",
+    dueBack: "Nov 12, 2026",
+    summary: "A collection of seventeen essays on attention, solitude and the small rituals that hold a life together. Bell writes with precision and warmth about what it means to notice the world rather than merely pass through it.",
+    subjects: ["Essays", "Nature Writing", "Attention", "Slow Living"]
+  },
+
+  "quiet-tide": {
+    title: "Quiet Tide",
+    author: "Noah Rowe",
+    theme: "tide",
+    coverTag: "Mystery",
+    coverLines: "QUIET<br>TIDE",
+    coverFoot: "N. Rowe",
+    category: "Mystery",
+    isbn: "978-1-2345-6792-0",
+    callNo: "MYS ROW",
+    year: 2024,
+    pages: 356,
+    publisher: "Harbour Lane",
+    language: "English",
+    rating: 4.2,
+    reviews: 211,
+    status: "available",
+    copies: "2 of 6 available",
+    location: "Main Reading Room · Shelf M-21",
+    dueBack: "Nov 02, 2026",
+    summary: "When a retired detective moves to a quiet island to forget his last case, the sea delivers something it should not have. A slow-burning mystery about guilt, tides and the things we choose not to see.",
+    subjects: ["Mystery", "Crime", "Island Life", "Suspense"]
+  },
+
+  "garden-map": {
+    title: "The Garden Map",
+    author: "Elian Moss",
+    theme: "garden",
+    coverTag: "History",
+    coverLines: "THE<br>GARDEN<br>MAP",
+    coverFoot: "Field notes",
+    category: "History",
+    isbn: "978-1-2345-6793-7",
+    callNo: "712.6 MOS",
+    year: 2022,
+    pages: 402,
+    publisher: "Stone Pine",
+    language: "English",
+    rating: 4.5,
+    reviews: 58,
+    status: "available",
+    copies: "3 of 3 available",
+    location: "Reference · Shelf H-05",
+    dueBack: "Nov 20, 2026",
+    summary: "Drawing on four centuries of plans, letters and field notes, Moss reconstructs the lost gardens of a great estate — and the people whose labour made them possible. A beautifully illustrated work of social and landscape history.",
+    subjects: ["History", "Gardens", "Landscape", "Social History"]
+  },
+
+  "station-at-dusk": {
+    title: "Station at Dusk",
+    author: "June Vale",
+    theme: "station",
+    coverTag: "Fiction",
+    coverLines: "STATION<br>AT DUSK",
+    coverFoot: "June Vale",
+    category: "Fiction",
+    isbn: "978-1-2345-6794-4",
+    callNo: "FIC VAL",
+    year: 2025,
+    pages: 264,
+    publisher: "Northbound",
+    language: "English",
+    rating: 4.3,
+    reviews: 87,
+    status: "available",
+    copies: "2 of 3 available",
+    location: "Main Reading Room · Shelf F-19",
+    dueBack: "Oct 30, 2026",
+    summary: "Every evening at dusk, a woman waits on Platform 4 for a train that no longer stops. A tender, spare novel about grief, habit and the small ceremonies that keep us going.",
+    subjects: ["Literary Fiction", "Grief", "Quiet Novels"]
+  },
+
+  "small-wonders": {
+    title: "A Field Guide to Small Wonders",
+    author: "Theo Hart",
+    theme: "field",
+    coverTag: "Nature",
+    coverLines: "A FIELD GUIDE<br>TO SMALL<br>WONDERS",
+    coverFoot: "Theo Hart",
+    category: "Nature",
+    isbn: "978-1-2345-6795-1",
+    callNo: "508 HAR",
+    year: 2024,
+    pages: 196,
+    publisher: "Meadow Press",
+    language: "English",
+    rating: 4.8,
+    reviews: 143,
+    status: "limited",
+    copies: "1 of 5 available",
+    location: "Children's Room · Shelf N-02",
+    dueBack: "Oct 09, 2026",
+    summary: "A pocket-sized invitation to look closer: moss on a wall, the underside of a leaf, the first frost. Hart pairs gentle illustrations with short, joyful notes on noticing the ordinary.",
+    subjects: ["Nature", "Illustrated", "Mindfulness", "All Ages"]
+  },
+
+  "letters-for-winter": {
+    title: "Letters for Winter",
+    author: "Beatrice Lane",
+    theme: "letters",
+    coverTag: "Letters",
+    coverLines: "LETTERS<br>FOR WINTER",
+    coverFoot: "Beatrice Lane",
+    category: "Letters",
+    isbn: "978-1-2345-6796-8",
+    callNo: "826 LAN",
+    year: 2023,
+    pages: 178,
+    publisher: "Quiet House Books",
+    language: "English",
+    rating: 4.5,
+    reviews: 61,
+    status: "out",
+    copies: "0 of 2 available",
+    location: "Main Reading Room · Shelf L-04",
+    dueBack: "On hold · 2 reservations",
+    summary: "A year of correspondence between two friends who have never met in person. By turns funny, sharp and deeply moving, these letters trace a friendship built entirely out of words.",
+    subjects: ["Letters", "Friendship", "Epistolary", "Non-fiction"]
+  }
+};
+
+/* =========================================================
+   3. 工具函数
+   ========================================================= */
+var app = document.getElementById("app");
+var toastEl = document.getElementById("toast");
+var toastTimer = null;
+
+function toast(message){
+  toastEl.textContent = message;
+  toastEl.classList.add("show");
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(function(){
+    toastEl.classList.remove("show");
+  }, 2400);
+}
+
+function escapeHTML(str){
+  return String(str)
+    .replace(/&/g,"&amp;")
+    .replace(/</g,"&lt;")
+    .replace(/>/g,"&gt;")
+    .replace(/"/g,"&quot;")
+    .replace(/'/g,"&#39;");
+}
+
+function starsHTML(rating){
+  var full = Math.floor(rating);
+  var half = rating - full >= 0.5;
+  var html = "";
+  var i;
+  for (i = 0; i < full; i++){
+    html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2l-5-4.9 6.9-1Z"/></svg>';
+  }
+  if (half){
+    html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2l-5-4.9 6.9-1Z" opacity=".5"/></svg>';
+  }
+  while (html.split("<svg").length - 1 < 5){
+    html += '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6"><path d="m12 2 3.1 6.3 6.9 1-5 4.9 1.2 6.9L12 17.8 5.8 21.1 7 14.2l-5-4.9 6.9-1Z"/></svg>';
+  }
+  return html;
+}
+
+function badgeHTML(status){
+  var map = {
+    available: { cls:"available", text:"Available" },
+    limited:   { cls:"limited",   text:"Limited Copies" },
+    out:       { cls:"out",       text:"Checked Out" }
+  };
+  var item = map[status] || map.available;
+  return '<span class="badge ' + item.cls + '"><i></i>' + item.text + '</span>';
+}
+
+function coverHTML(book, big){
+  var theme = THEMES[book.theme] || THEMES.moon;
+  return (
+    '<div class="book-cover' + (big ? ' cover-lg' : '') + '" ' +
+      'style="background:' + theme.bg + ';color:' + theme.text + ';">' +
+      '<span class="cover-tag">' + escapeHTML(book.coverTag) + '</span>' +
+      '<span class="cover-title">' + book.coverLines + '</span>' +
+      '<span class="cover-foot">' + escapeHTML(book.coverFoot) + '</span>' +
+    '</div>'
+  );
+}
+
+/* =========================================================
+   4. 目录视图（无 ?id 时）
+   ========================================================= */
+function renderIndex(){
+  document.title = "All Books · LibriNova Library";
+
+  var keys = Object.keys(BOOKS);
+  var cards = keys.map(function(id){
+    var book = BOOKS[id];
+    return (
+      '<a class="book-card" href="?id=' + encodeURIComponent(id) + '">' +
+        coverHTML(book, false) +
+        '<h3>' + escapeHTML(book.title) + '</h3>' +
+        '<p>' + escapeHTML(book.author) + '</p>' +
+      '</a>'
+    );
+  }).join("");
+
+  app.innerHTML =
+    '<div class="catalogue-head">' +
+      '<h1>All Books</h1>' +
+      '<p>' + keys.length + ' titles in the catalogue · click a cover to view details</p>' +
+    '</div>' +
+    '<div class="catalogue-grid">' + cards + '</div>';
+}
+
+/* =========================================================
+   5. 详情视图
+   ========================================================= */
+function renderBook(id){
+  var book = BOOKS[id];
+  if (!book){ renderNotFound(id); return; }
+
+  document.title = book.title + " · LibriNova Library";
+
+  var subjectsHTML = book.subjects.map(function(s){
+    return '<span class="subject-chip">' + escapeHTML(s) + '</span>';
+  }).join("");
+
+  var isOut = book.status === "out";
+
+  app.innerHTML =
+    '<nav class="breadcrumb" aria-label="Breadcrumb">' +
+      '<a href="?">All Books</a>' +
+      '<span>/</span>' +
+      '<span>' + escapeHTML(book.category) + '</span>' +
+      '<span>/</span>' +
+      '<span>' + escapeHTML(book.title) + '</span>' +
+    '</nav>' +
+
+    '<article class="detail">' +
+
+      '<div class="detail-left">' +
+        coverHTML(book, true) +
+
+        '<div class="status-card">' +
+          '<div class="status-row">' +
+            '<span class="label">Status</span>' +
+            '<span class="value">' + badgeHTML(book.status) + '</span>' +
+          '</div>' +
+          '<div class="status-row">' +
+            '<span class="label">Availability</span>' +
+            '<span class="value">' + escapeHTML(book.copies) + '</span>' +
+          '</div>' +
+          '<div class="status-row">' +
+            '<span class="label">Due back</span>' +
+            '<span class="value">' + escapeHTML(book.dueBack) + '</span>' +
+          '</div>' +
+        '</div>' +
+        '<section class="copy-list"><h3>Physical Copies on Shelf</h3>' + (function(){var m=book.copies.match(/(\d+) of (\d+)/),a=m?+m[1]:0,t=m?+m[2]:0,r='';for(var i=1;i<=t;i++)r+='<tr><td>BC-'+String(id).toUpperCase()+'-'+String(i).padStart(3,'0')+'</td><td>'+escapeHTML(book.location||'Shelf A-1')+'</td><td>'+(i<=a?'Available':'Borrowed')+'</td></tr>';return '<table><thead><tr><th>Barcode</th><th>Shelf location</th><th>Status</th></tr></thead><tbody>'+r+'</tbody></table>';})() + '</section>' +
+        '<button type="button" class="btn-primary focus-ring" id="borrowBtn"' +
+          (isOut ? ' disabled' : '') + '>' +
+          (isOut ? 'Currently Unavailable' : 'Borrow This Book') +
+        '</button>' +
+
+        '<div class="copy-picker" id="copyPicker"><label for="copyBarcode">Choose available copy barcode</label><select id="copyBarcode"></select><p>Bring this barcode to the front desk to complete check out.</p><button type="button" class="btn-primary" id="requestCopy">Choose this copy</button></div>' +
+        '<button type="button" class="btn-ghost focus-ring" id="holdBtn">' +
+          'Place a Hold' +
+        '</button>' +
+      '</div>' +
+
+      '<div class="detail-right">' +
+        '<p class="eyebrow">' + escapeHTML(book.category) + '</p>' +
+        '<h1>' + escapeHTML(book.title) + '</h1>' +
+        '<p class="byline">by <strong>' + escapeHTML(book.author) + '</strong></p>' +
+
+        '<div class="rating-row">' +
+          '<span class="stars" aria-hidden="true">' + starsHTML(book.rating) + '</span>' +
+          '<span>' + book.rating.toFixed(1) + ' · ' + book.reviews + ' reviews</span>' +
+        '</div>' +
+
+        '<p class="summary">' + escapeHTML(book.summary) + '</p>' +
+
+        '<dl class="meta-grid">' +
+          '<div class="meta-item"><p class="k">Call Number</p><p class="v">' + escapeHTML(book.callNo) + '</p></div>' +
+          '<div class="meta-item"><p class="k">ISBN</p><p class="v">' + escapeHTML(book.isbn) + '</p></div>' +
+          '<div class="meta-item"><p class="k">Published</p><p class="v">' + book.year + '</p></div>' +
+          '<div class="meta-item"><p class="k">Pages</p><p class="v">' + book.pages + '</p></div>' +
+          '<div class="meta-item"><p class="k">Publisher</p><p class="v">' + escapeHTML(book.publisher) + '</p></div>' +
+          '<div class="meta-item"><p class="k">Language</p><p class="v">' + escapeHTML(book.language) + '</p></div>' +
+          '<div class="meta-item"><p class="k">Location</p><p class="v">' + escapeHTML(book.location) + '</p></div>' +
+        '</dl>' +
+
+        '<div class="subjects">' + subjectsHTML + '</div>' +
+
+        (isOut
+          ? '<p class="extra-note">All copies are currently on loan. Place a hold and we will notify you as soon as one is returned.</p>'
+          : '<p class="extra-note">Standard loan period is 30 days, renewable twice if no one else has placed a hold.</p>'
+        ) +
+      '</div>' +
+
+    '</article>';
+
+  /* 按钮交互（演示） */
+  var borrowBtn = document.getElementById("borrowBtn");
+  if (borrowBtn && !borrowBtn.disabled){
+    borrowBtn.addEventListener("click", function(){
+      var picker=document.getElementById('copyPicker'),select=document.getElementById('copyBarcode'),m=book.copies.match(/(\d+) of (\d+)/),a=m?+m[1]:0;select.innerHTML='';for(var i=1;i<=a;i++){var code='BC-'+String(id).toUpperCase()+'-'+String(i).padStart(3,'0'),o=document.createElement('option');o.value=code;o.textContent=code;select.appendChild(o);}picker.classList.toggle('is-open');
+    });
+    document.getElementById('requestCopy').addEventListener('click',function(){var code=document.getElementById('copyBarcode').value;if(code)toast('Selected '+code+'. Bring this barcode to the front desk to check out.');else toast('No available copy to select.');});
+  }
+  document.getElementById("holdBtn").addEventListener("click", function(){
+    toast('Hold placed on “' + book.title + '” (demo).');
+  });
+}
+
+/* =========================================================
+   6. 未找到
+   ========================================================= */
+function renderNotFound(id){
+  document.title = "Book Not Found · LibriNova Library";
+  app.innerHTML =
+    '<div class="not-found">' +
+      '<h1>Book not found</h1>' +
+      '<p>We could not find a book with the ID <strong>' + escapeHTML(id || "(empty)") + '</strong>.' +
+      ' It may have been removed from the catalogue, or the link may be incorrect.</p>' +
+      '<a href="?">Browse all books</a>' +
+    '</div>';
+}
+
+/* =========================================================
+   7. 路由：读取 ?id=
+   ========================================================= */
+function route(){
+  var params = new URLSearchParams(window.location.search);
+  var id = params.get("id");
+
+  if (!id){
+    renderIndex();
+  } else {
+    renderBook(id.trim());
+  }
+
+  window.scrollTo({ top: 0, behavior: "auto" });
+}
+
+window.addEventListener("popstate", route);
+route();
+</script>
+</body>
+</html>
